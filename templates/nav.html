@@ -152,7 +152,7 @@
     }
 
     .input-group { margin-bottom: 1.5rem; }
-    .input-row { display: flex; gap: 1rem; margin-bottom: 1rem; }
+    .input-row { display: flex; gap: 1rem; margin-bottom: 1rem; flex-direction: column; }
     .input-field { flex: 1; }
 
     .control-label {
@@ -225,7 +225,6 @@
         border-right: none;
         border-bottom: 1px solid var(--color-glass-border);
       }
-      .input-row { flex-direction: column; }
     }
   </style>
 </head>
@@ -244,12 +243,14 @@
           <div class="input-field">
             <label class="control-label">Latitude</label>
             <input type="text" id="vis-latitude" placeholder="Enter latitude">
+            <button onclick="startVoiceInput('vis-latitude')" class="btn">🎤 Speak Latitude</button>
           </div>
         </div>
         <div class="input-row">
           <div class="input-field">
             <label class="control-label">Longitude</label>
             <input type="text" id="vis-longitude" placeholder="Enter longitude">
+            <button onclick="startVoiceInput('vis-longitude')" class="btn">🎤 Speak Longitude</button>
           </div>
         </div>
         <button class="btn btn-primary" id="search-btn">Submit</button>
@@ -311,7 +312,6 @@
       if (point2) content += `<p><strong>Point 2:</strong> ${point2.lat}, ${point2.lon}</p>`;
       output.innerHTML = content;
 
-      // Redirect to /nav to update current_tif.txt
       window.location.href = `/nav?lat=${lat}&lon=${lon}`;
     });
 
@@ -329,6 +329,25 @@
         }
       }
     });
+
+    function startVoiceInput(fieldId) {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onresult = (event) => {
+        const spoken = event.results[0][0].transcript;
+        const cleaned = spoken.replace(/[^0-9.\-]/g, '');
+        document.getElementById(fieldId).value = cleaned;
+      };
+
+      recognition.onerror = (event) => {
+        alert("Voice input error: " + event.error);
+      };
+
+      recognition.start();
+    }
   </script>
 </body>
 </html>
